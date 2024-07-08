@@ -14,8 +14,8 @@ class GetImages:
 
     def __init__(self, number_of_epochs, batch_size, validation_split):
         self.number_of_images = 8
-        self.width = 320
-        self.height = 320
+        self.width = 64
+        self.height = 64
         self.image_size = (self.height, self.width)
         self.number_of_epochs = number_of_epochs
         self.batch_size = batch_size

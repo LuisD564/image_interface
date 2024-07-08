@@ -21,44 +21,44 @@ class MainFrame(tk.Frame):
         self.frame1.grid(row = 1, column = 0)
         self.frame2 = tk.Frame(self)
         self.frame2.grid(row = 2, column = 0)
-        self.frame3 = tk.Frame(self)
-        self.frame3.grid(row = 3, column = 0)
+        # self.frame3 = tk.Frame(self)
+        # self.frame3.grid(row = 3, column = 0)
 
         button1 = tk.Button(self.frame0, text = "Start/Stop", command = self._on_button1)
         button1.pack()
 
         #_______________________Adjust Time Sleep_____________________
         #Time Sleep
-        self.time_to_sleep = tk.Label(self.frame1, text = "Sleep between images:", bd=10)
+        self.time_to_sleep = tk.Label(self.frame0, text = "Sleep between images:", bd=10)
         self.time_to_sleep.pack()
-        self.time_to_sleep_entry = tk.Entry(self.frame1, width = 5)
+        self.time_to_sleep_entry = tk.Entry(self.frame0, width = 5)
         self.time_to_sleep_entry.pack()
 
         #ML settings
-        self.probability_of_having_circle = tk.Label(self.frame2, text ="Probability of having a circle (%):", bd = 10)
+        self.probability_of_having_circle = tk.Label(self.frame1, text ="Probability of having a circle (%):", bd = 10)
         self.probability_of_having_circle.pack()
-        self.probability_of_having_circle_box = tk.Entry(self.frame2, text="FRONT", width = 5)
+        self.probability_of_having_circle_box = tk.Entry(self.frame1, text="FRONT", width = 5)
         self.probability_of_having_circle_box.pack()
 
-        self.number_of_epochs = tk.Label(self.frame2, text="Number of epochs:", bd=10)
+        self.number_of_epochs = tk.Label(self.frame1, text="Number of epochs:", bd=10)
         self.number_of_epochs.pack()
-        self.number_of_epochs_box = tk.Entry(self.frame2, text="TOP", width = 5)
+        self.number_of_epochs_box = tk.Entry(self.frame1, text="TOP", width = 5)
         self.number_of_epochs_box.pack()
 
-        self.batch_size = tk.Label(self.frame2, text="Batch size:", bd=10)
+        self.batch_size = tk.Label(self.frame1, text="Batch size:", bd=10)
         self.batch_size.pack()
-        self.batch_size_box = tk.Entry(self.frame2, text="BACK", width=5)
+        self.batch_size_box = tk.Entry(self.frame1, text="BACK", width=5)
         self.batch_size_box.pack()
 
-        self.validation_split = tk.Label(self.frame2, text="Validation Split:", bd=10)
+        self.validation_split = tk.Label(self.frame1, text="Validation Split:", bd=10)
         self.validation_split.pack()
-        self.validation_split_box = tk.Entry(self.frame2, width=5)
+        self.validation_split_box = tk.Entry(self.frame1, width=5)
         self.validation_split_box.pack()
 
         #_______________Display Smartex Logo__________________
-        self.smartex_image = ImageTk.PhotoImage(file = 'logo.png')
+        self.smartex_image = ImageTk.PhotoImage(file = 'GitHub_logo.png')
         self.smx_label = tk.Label(self, image = self.smartex_image)
-        self.smx_label.grid(row=4, column=0, padx = 0, pady = 0)
+        self.smx_label.grid(row=3, column=0, padx = 0, pady = 0)
 
 
         #____________________Initialization____________________________
