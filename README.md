@@ -2,4 +2,6 @@ Interface that generates images with circles and builds a convolutional neural n
 
 Various parameters such as the number of epochs, the batchsize, the validation split, etc, can be tweaked.
 
-To use this program you just need to clone this repository and install the requirements. You should use python 3.10
+To use this program you just need to clone this repository, install the requirements, and run run_interface.py. 
+
+You should use Python 3.8
