@@ -4,6 +4,7 @@ import tkinter as tk
 from PIL import ImageTk, Image
 import psutil
 import gc
+from typing import List, Tuple
 
 from get_images import GetImages
 
@@ -14,27 +15,24 @@ class MainFrame(tk.Frame):
         self.master = master
         self._looping    = False
 
-        #_________Start/Stop button_____________________
+        # Start/Stop button
         self.frame0 = tk.Frame(self)
-        self.frame0.grid(row = 0, column = 0)
+        self.frame0.grid(row=0, column=0)
         self.frame1 = tk.Frame(self)
-        self.frame1.grid(row = 1, column = 0)
+        self.frame1.grid(row=1, column=0)
         self.frame2 = tk.Frame(self)
-        self.frame2.grid(row = 2, column = 0)
-        # self.frame3 = tk.Frame(self)
-        # self.frame3.grid(row = 3, column = 0)
+        self.frame2.grid(row=2, column=0)
 
         button1 = tk.Button(self.frame0, text = "Start/Stop", command = self._on_button1)
         button1.pack()
 
-        #_______________________Adjust Time Sleep_____________________
-        #Time Sleep
+        # Time Sleep
         self.time_to_sleep = tk.Label(self.frame0, text = "Sleep between images:", bd=10)
         self.time_to_sleep.pack()
         self.time_to_sleep_entry = tk.Entry(self.frame0, width = 5)
         self.time_to_sleep_entry.pack()
 
-        #ML settings
+        # ML settings
         self.probability_of_having_circle = tk.Label(self.frame1, text ="Probability of having a circle (%):", bd = 10)
         self.probability_of_having_circle.pack()
         self.probability_of_having_circle_box = tk.Entry(self.frame1, text="FRONT", width = 5)
@@ -55,58 +53,179 @@ class MainFrame(tk.Frame):
         self.validation_split_box = tk.Entry(self.frame1, width=5)
         self.validation_split_box.pack()
 
-        #_______________Display Smartex Logo__________________
-        self.smartex_image = ImageTk.PhotoImage(file = 'GitHub_logo.png')
-        self.smx_label = tk.Label(self, image = self.smartex_image)
+        # Display Github Logo
+        self.github_image = ImageTk.PhotoImage(file ='GitHub_logo.png')
+        self.smx_label = tk.Label(self, image=self.github_image)
         self.smx_label.grid(row=3, column=0, padx = 0, pady = 0)
 
-
-        #____________________Initialization____________________________
+        # Initialization
         self.ml_model_loaded = False
-        self._display_photos()
+        self._display_images()
 
     def _on_button1(self):
+        """
+        Changes the state of the Start/Stop button to True or False upon click in the interface.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        None
+        """
+
         self._looping = not self._looping
 
     def _probability_of_having_circle(self) -> int:
+        """
+        Probability of image having a circle. User defines it by writing an integer on the interface.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        int
+            Probability of images having a circle.
+        """
+
         return int(self.probability_of_having_circle_box.get())
 
     def _number_of_epochs(self) -> int:
+        """
+        Number of epochs defined by the user upon writing an integer on the interface.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        int
+            Number of epochs.
+        """
+
         return int(self.number_of_epochs_box.get())
 
     def _batch_size(self) -> int:
+        """
+        Batch size defined by the user upon writing an integer on the interface.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        int
+            Batch size.
+        """
+
         return int(self.batch_size_box.get())
 
     def _validation_split(self) -> float:
+        """
+        Validation split defined by the user upon writing a float on the interface.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        float
+            Validation split.
+        """
+
         return float(self.validation_split_box.get())
 
     def _time_to_sleep(self) -> int:
+        """
+        Time sleep in seconds between batches of images.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        int
+            Time sleep.
+        """
+
         return int(self.time_to_sleep_entry.get())
 
     def _clean_labels(self) -> None:
+        """
+        Clens tkinter labels by garbage collecting them. This is a preventive method for avoiding memory leaks.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        None
+        """
+
         self.master.unbind("<Button-1>")
         for label in self.image_labels:
             label.destroy()
         gc.collect()
 
-    def _display_photos(self) -> None:
+    def _display_images(self) -> None:
+        """
+        Main cycle for getting the images and displaying them in the interface. It only prepares the ML model once,
+        upon initialization of the interface.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        None
+        """
+
         if self._looping:
             if not self.ml_model_loaded:
                 self.load_ml_model()
 
-            batch = self.lp.loop(self._probability_of_having_circle())
+            batch = self.get_images.loop(self._probability_of_having_circle())
             front_top_threading = threading.Thread(target=self.show_front, args=(batch, ))
             front_top_threading.start()
 
-        self.after(10000, self._display_photos)
+        self.after(10000, self._display_images)
 
     def load_ml_model(self) -> None:
-        self.lp = GetImages(number_of_epochs=self._number_of_epochs(),
-                            batch_size=self._batch_size(),
-                            validation_split=self._validation_split())
+        """
+        Loads the ML model only if the interface has not initialized, i.e., if the attribute self.ml_model_loaded
+        is false.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        None
+        """
+
+        self.get_images = GetImages(number_of_epochs=self._number_of_epochs(),
+                                    batch_size=self._batch_size(),
+                                    validation_split=self._validation_split())
         self.ml_model_loaded = True
 
-    def show_front(self, batch) -> None:
+    def show_front(self, batch: Tuple[List[str], str]) -> None:
+        """
+        Method that gets the images in the folder generated images and displays them in the interface. It creates the
+        tkinter labels for each image and binds each one of them so that the user has the ability to click on the
+        image, and it opens in a new window.
+
+        It also logs the RAM so that the user can monitor whether there is a memory leak happening.
+
+        Parameters
+        ----------
+        batch: Tuple[List[str], str]
+
+        Returns
+        -------
+        None
+        """
+
         def open_image_window_1():
             image_window = tk.Toplevel(self)
             image_window.title(batch[0][0])
@@ -197,7 +316,7 @@ class MainFrame(tk.Frame):
             label.grid(row=row, column=column, padx=0, pady=0)
             self.image_labels.append(label)
 
-        for i in range(self.lp.number_of_images):
+        for i in range(self.get_images.number_of_images):
             self.image_labels[i].bind("<Button-1>", eval(f'image_clicked_{i + 1}'))
 
         self.label_legend = tk.Label(self, text=f'{batch[1]}')

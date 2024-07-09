@@ -23,7 +23,21 @@ class GetImages:
         self.train_model()
 
     @staticmethod
-    def generate_circle_image(image_size, with_circle=True) -> np.array:
+    def generate_circle_image(image_size: np.array, with_circle=True) -> np.array:
+        """
+        Generates an image with a circle if the flag with_circle is True. Otherwise, generates an image without a circle.
+
+        Parameters
+        ----------
+        image_size: Tuple[int, int]
+        with_circle : bool
+
+        Returns
+        -------
+        img: np.array
+            Image with or without circle
+        """
+
         img = np.zeros(image_size + (1,), dtype=np.uint8)
         if with_circle:
             center = (np.random.randint(10, image_size[0] - 10), np.random.randint(10, image_size[1] - 10))
@@ -31,7 +45,21 @@ class GetImages:
             cv2.circle(img, center, radius, (255), -1)
         return img
 
-    def loop(self, probability_of_circle) -> Tuple[List[str], str]:
+    def loop(self, probability_of_circle: int) -> Tuple[List[str], str]:
+        """
+        Generates an images, predicts if these have a circle or not using the ML model, and saves them in the folder
+        generated_images.
+
+        Parameters
+        ----------
+        probability_of_circle: int
+
+        Returns
+        -------
+        images_paths, time_now: Tuple[List[str], str]
+            Images' paths and the timestamp of when they were generated.
+        """
+
         try:
             images_paths = []
             time_now = None
@@ -57,6 +85,19 @@ class GetImages:
             print(f"Got an error when generating the images: {type(ex)}: {ex}")
 
     def train_model(self):
+        """
+        Creates a dataset of images with and withou circles, creates a model based of a convolutional neural
+        network, trains the model with the method fit, and evaluates its accuracy.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
+
         X, y = self.create_dataset(self.image_size)
         X = X / 255.0
 
@@ -72,7 +113,6 @@ class GetImages:
 
         self.model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 
-        print(f"NUmber of epochs: {self.number_of_epochs}")
         self.model.fit(X, y, epochs=self.number_of_epochs, batch_size=self.batch_size,
                        validation_split=self.validation_split)
 
@@ -80,7 +120,21 @@ class GetImages:
         loss, accuracy = self.model.evaluate(X, y)
         print(f'Accuracy: {accuracy * 100:.2f}%')
 
-    def create_dataset(self, image_size, num_samples=1000) -> Tuple[np.array, np.array]:
+    def create_dataset(self, image_size: Tuple, num_samples=1000) -> Tuple[np.array, np.array]:
+        """
+        Creates the dataset of images with a default sample size of 1000.
+
+        Parameters
+        ----------
+        image_size: Tuple[int, int]
+        num_samples: int
+
+        Returns
+        -------
+        Tuple[np.array, np.array]
+            X are the images and y is a map of if the image has or has not a circle.
+        """
+
         X, y = [], []
         for _ in range(num_samples // 2):
             X.append(self.generate_circle_image(image_size, with_circle=True))
@@ -89,7 +143,20 @@ class GetImages:
             y.append(0)
         return np.array(X), np.array(y)
 
-    def draw_green_circle(self, image) -> np.array:
+    def draw_green_circle(self, image: np.array) -> np.array:
+        """
+        Draws a green circle above the input image.
+
+        Parameters
+        ----------
+        image: np.array
+
+        Returns
+        -------
+        image_bgr: np.array
+            Image in bgr with a green circle.
+        """
+
         image_bgr = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
         center = (self.width - 10, self.height - 10)
         radius = 5
@@ -99,8 +166,22 @@ class GetImages:
 
         return image_bgr
 
-    def predict_circle(self, img, image_size) -> bool:
-        img = cv2.resize(img, image_size)
+    def predict_circle(self, image, image_size) -> bool:
+        """
+        Predicts whether the input image has a circle or not using the ML model.
+
+        Parameters
+        ----------
+        image: np.array
+        image_size: Tuple[int, int]
+
+        Returns
+        -------
+        bool
+            True if the input image has a circle and False if it doesn't.
+        """
+
+        img = cv2.resize(image, image_size)
         img = img.reshape((1, self.height, self.width, 1)) / 255.0
         prediction = self.model.predict(img)
         return prediction[0][0] > 0.5
